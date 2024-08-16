@@ -25,9 +25,9 @@ public class User {
     @NoSpacesValidator(message = "Логин не должен содержать пробелы.")
     private String login;
 
-    @NotNull(message = "Имя пользователя не должно быть null.")
     private String name;
 
+    @NotNull(message = "Дата рождения не должна быть null.")
     @PastOrPresent(message = "Дата рождения не может быть в будущем.")
     private LocalDate birthday;
 }
