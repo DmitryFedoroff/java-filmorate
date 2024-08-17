@@ -16,9 +16,6 @@ public class DateAfterStandartValidator implements ConstraintValidator<DateAfter
 
     @Override
     public boolean isValid(LocalDate localDate, ConstraintValidatorContext context) {
-        if (localDate == null) {
-            return true;
-        }
-        return !localDate.isBefore(standartDate);
+        return localDate == null ? true : !localDate.isBefore(standartDate);
     }
 }

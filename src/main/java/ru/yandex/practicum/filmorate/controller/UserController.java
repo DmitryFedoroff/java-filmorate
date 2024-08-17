@@ -11,16 +11,19 @@ import ru.yandex.practicum.filmorate.util.BaseEntityUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
     private final Map<Long, User> users = new HashMap<>();
+    private final Set<String> emails = new HashSet<>();
 
-    private boolean isUserWithEmailExist(String eMail) {
-        return users.values().stream().anyMatch(userFromMemory -> userFromMemory.getEmail().equals(eMail));
+    private boolean isUserWithEmailExist(String email) {
+        return emails.contains(email);
     }
 
     @GetMapping
@@ -45,6 +48,7 @@ public class UserController {
 
         user.setId(BaseEntityUtils.getNextId(users));
         users.put(user.getId(), user);
+        emails.add(user.getEmail());
 
         log.info("Пользователь успешно создан: {}", user);
         return user;
@@ -59,18 +63,22 @@ public class UserController {
             throw new ValidationException("ID пользователя должен быть указан.");
         }
 
-        User existingUser = users.get(newUser.getId());
-        if (existingUser == null) {
+        if (!users.containsKey(newUser.getId())) {
             log.error("Ошибка: Пользователь с ID {} не найден.", newUser.getId());
             throw new NotFoundException("Пользователь с указанным ID не найден.");
         }
 
-        if (isUserWithEmailExist(newUser.getEmail()) && !existingUser.getEmail().equals(newUser.getEmail())) {
+        User existingUser = users.get(newUser.getId());
+
+        if (!existingUser.getEmail().equals(newUser.getEmail()) && isUserWithEmailExist(newUser.getEmail())) {
             log.error("Ошибка: Электронная почта уже используется другим пользователем.");
             throw new DuplicatedDataException("Эта электронная почта уже используется другим пользователем.");
         }
 
+        emails.remove(existingUser.getEmail());
         existingUser.setEmail(newUser.getEmail());
+        emails.add(newUser.getEmail());
+
         existingUser.setLogin(newUser.getLogin());
         if (!newUser.getName().isBlank()) {
             existingUser.setName(newUser.getName());
