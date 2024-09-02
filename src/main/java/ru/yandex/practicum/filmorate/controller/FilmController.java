@@ -1,51 +1,48 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
+@RequiredArgsConstructor
+@Validated
 public class FilmController {
 
-    private final FilmStorage filmStorage;
     private final FilmService filmService;
-
-    @Autowired
-    public FilmController(FilmStorage filmStorage, FilmService filmService) {
-        this.filmStorage = filmStorage;
-        this.filmService = filmService;
-    }
 
     @GetMapping
     public List<Film> findAll() {
         log.debug("Запрос на получение всех фильмов.");
-        return (List<Film>) filmStorage.findAll();
+        return filmService.findAll();
     }
 
     @GetMapping("/{id}")
     public Film findById(@PathVariable Long id) {
         log.debug("Запрос на получение фильма с ID: {}", id);
-        return filmStorage.findById(id);
+        return filmService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Фильм с ID " + id + " не найден."));
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         log.debug("Попытка создания нового фильма: {}", film);
-        return filmStorage.create(film);
+        return filmService.create(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
         log.debug("Попытка обновления фильма: {}", film);
-        return filmStorage.update(film);
+        return filmService.update(film);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -61,7 +58,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") @Positive int count) {
         log.debug("Запрос на получение топ {} популярных фильмов.", count);
         return filmService.getPopularFilms(count);
     }
