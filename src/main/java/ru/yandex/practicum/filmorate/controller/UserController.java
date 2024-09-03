@@ -1,91 +1,67 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.util.BaseEntityUtils;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
+@RequiredArgsConstructor
 public class UserController {
-    private final Map<Long, User> users = new HashMap<>();
-    private final Set<String> emails = new HashSet<>();
 
-    private boolean isUserWithEmailExist(String email) {
-        return emails.contains(email);
-    }
+    private final UserService userService;
 
     @GetMapping
-    public Collection<User> getUsers() {
+    public List<User> getUsers() {
         log.debug("Запрос на получение всех пользователей.");
-        return users.values();
+        return userService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Long id) {
+        log.debug("Запрос на получение пользователя с ID: {}", id);
+        return userService.findById(id);
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
         log.debug("Попытка создания нового пользователя: {}", user);
-
-        if (isUserWithEmailExist(user.getEmail())) {
-            log.error("Ошибка: Электронная почта уже используется.");
-            throw new DuplicatedDataException("Эта электронная почта уже используется.");
-        }
-
-        if (user.getName() == null || user.getName().isBlank()) {
-            log.debug("Имя пользователя не указано, используем логин: {}", user.getLogin());
-            user.setName(user.getLogin());
-        }
-
-        user.setId(BaseEntityUtils.getNextId(users));
-        users.put(user.getId(), user);
-        emails.add(user.getEmail());
-
-        log.info("Пользователь успешно создан: {}", user);
-        return user;
+        return userService.create(user);
     }
 
     @PutMapping
-    public User update(@Valid @RequestBody User newUser) {
-        log.debug("Попытка обновления данных пользователя: {}", newUser);
+    public User update(@Valid @RequestBody User user) {
+        log.debug("Попытка обновления пользователя: {}", user);
+        return userService.update(user);
+    }
 
-        if (newUser.getId() == null) {
-            log.error("Ошибка: ID пользователя не указан.");
-            throw new ValidationException("ID пользователя должен быть указан.");
-        }
+    @PutMapping("/{id}/friends/{friendId}")
+    public User addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        log.debug("Добавление пользователя с ID {} в друзья пользователю с ID {}", friendId, id);
+        return userService.addFriend(id, friendId);
+    }
 
-        if (!users.containsKey(newUser.getId())) {
-            log.error("Ошибка: Пользователь с ID {} не найден.", newUser.getId());
-            throw new NotFoundException("Пользователь с указанным ID не найден.");
-        }
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public User removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        log.debug("Удаление пользователя с ID {} из друзей пользователя с ID {}", friendId, id);
+        return userService.removeFriend(id, friendId);
+    }
 
-        User existingUser = users.get(newUser.getId());
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable Long id) {
+        log.debug("Запрос на получение списка друзей пользователя с ID: {}", id);
+        return userService.getFriends(id);
+    }
 
-        if (!existingUser.getEmail().equals(newUser.getEmail()) && isUserWithEmailExist(newUser.getEmail())) {
-            log.error("Ошибка: Электронная почта уже используется другим пользователем.");
-            throw new DuplicatedDataException("Эта электронная почта уже используется другим пользователем.");
-        }
-
-        emails.remove(existingUser.getEmail());
-        existingUser.setEmail(newUser.getEmail());
-        emails.add(newUser.getEmail());
-
-        existingUser.setLogin(newUser.getLogin());
-        if (!newUser.getName().isBlank()) {
-            existingUser.setName(newUser.getName());
-        }
-        existingUser.setBirthday(newUser.getBirthday());
-
-        log.info("Пользователь успешно обновлен: {}", existingUser);
-        return existingUser;
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        log.debug("Запрос на получение общих друзей между пользователями с ID: {} и ID: {}", id, otherId);
+        return userService.getCommonFriends(id, otherId);
     }
 }

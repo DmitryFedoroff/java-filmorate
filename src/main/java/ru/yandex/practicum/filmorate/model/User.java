@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +11,8 @@ import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(of = {"id"})
@@ -30,4 +33,7 @@ public class User {
     @NotNull(message = "Дата рождения не должна быть null.")
     @PastOrPresent(message = "Дата рождения не может быть в будущем.")
     private LocalDate birthday;
+
+    @JsonIgnore
+    private Set<Long> friends = new HashSet<>();
 }
