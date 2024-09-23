@@ -2,11 +2,11 @@
 Template repository for Filmorate project.
 
 <details>
-<summary><b>Схема базы данных проекта Filmorate:</b></summary>
+<summary><b>Схема базы данных проекта Filmorate</b></summary>
 
 ![Схема базы данных проекта Filmorate в формате png](/src/main/docs/intermediate-sql-task.png)
 
-![Оригинал схемы базы данных проекта Filmorate на dbdiagram.io](https://dbdiagram.io/d/intermediate-sql-month-task-66f0d439a0828f8aa6b029fc)
+[Оригинал схемы базы данных проекта Filmorate на dbdiagram.io](https://dbdiagram.io/d/intermediate-sql-month-task-66f0d439a0828f8aa6b029fc)
 
 
 1. **`USERS`** хранит данные пользователей, включая эл. почту, логин, имя и дату рождения.
