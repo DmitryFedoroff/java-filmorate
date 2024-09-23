@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.annotation.DateAfterStandart;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(of = {"id"})
@@ -37,4 +38,10 @@ public class Film {
 
     @JsonIgnore
     private Set<Long> likes = new HashSet<>();
+
+    @NotNull(message = "Жанр фильма должен быть указан.")
+    private List<String> genres;
+
+    @NotNull(message = "Возрастной рейтинг фильма должен быть указан.")
+    private String mpaRating;
 }

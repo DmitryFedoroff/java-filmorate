@@ -30,6 +30,8 @@ public class InMemoryUserStorage implements UserStorage {
         users.put(user.getId(), user);
         emails.add(user.getEmail());
 
+        user.setFriendshipStatus("неподтверждённая");
+
         return user;
     }
 
@@ -52,6 +54,8 @@ public class InMemoryUserStorage implements UserStorage {
         existingUser.setLogin(user.getLogin());
         existingUser.setName(user.getName().isBlank() ? existingUser.getLogin() : user.getName());
         existingUser.setBirthday(user.getBirthday());
+
+        existingUser.setFriendshipStatus(user.getFriendshipStatus());
 
         return existingUser;
     }
