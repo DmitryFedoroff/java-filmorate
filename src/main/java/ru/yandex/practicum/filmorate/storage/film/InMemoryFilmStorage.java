@@ -28,17 +28,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (!films.containsKey(film.getId())) {
             throw new NotFoundException("Фильм с ID " + film.getId() + " не найден.");
         }
-        Film existingFilm = films.get(film.getId());
-        existingFilm.setName(film.getName());
-        existingFilm.setDescription(film.getDescription());
-        existingFilm.setReleaseDate(film.getReleaseDate());
-        existingFilm.setDuration(film.getDuration());
-
-        existingFilm.setGenres(film.getGenres());
-        existingFilm.setMpaRating(film.getMpaRating());
-
-        films.put(existingFilm.getId(), existingFilm);
-        return existingFilm;
+        films.put(film.getId(), film);
+        return film;
     }
 
     @Override
@@ -57,5 +48,31 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new NotFoundException("Фильм с ID " + id + " не найден.");
         }
         films.remove(id);
+    }
+
+    @Override
+    public Film addLike(Long filmId, Long userId) {
+        Film film = findById(filmId).orElseThrow(() -> new NotFoundException("Фильм с ID " + filmId + " не найден."));
+        film.getLikes().add(userId);
+        return film;
+    }
+
+    @Override
+    public Film removeLike(Long filmId, Long userId) {
+        Film film = findById(filmId).orElseThrow(() -> new NotFoundException("Фильм с ID " + filmId + " не найден."));
+        film.getLikes().remove(userId);
+        return film;
+    }
+
+    @Override
+    public void deleteFilmGenres(Long filmId) {
+        Film film = findById(filmId).orElseThrow(() -> new NotFoundException("Фильм с ID " + filmId + " не найден."));
+        film.setGenres(new ArrayList<>());
+    }
+
+    @Override
+    public void saveFilmGenres(Film film) {
+        Film existingFilm = findById(film.getId()).orElseThrow(() -> new NotFoundException("Фильм с ID " + film.getId() + " не найден."));
+        existingFilm.setGenres(film.getGenres());
     }
 }

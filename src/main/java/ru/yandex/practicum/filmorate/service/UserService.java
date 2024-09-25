@@ -1,14 +1,16 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.util.ValidationUtils;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -16,81 +18,65 @@ public class UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
+    @Transactional
     public User addFriend(Long userId, Long friendId) {
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
-
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
-
-        userStorage.update(user);
-        userStorage.update(friend);
-
-        return user;
+        User user = findUserByIdOrThrow(userId);
+        User friend = findUserByIdOrThrow(friendId);
+        return userStorage.addFriend(user.getId(), friend.getId());
     }
 
+    @Transactional
     public User removeFriend(Long userId, Long friendId) {
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
-
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
-
-        userStorage.update(user);
-        userStorage.update(friend);
-
-        return user;
+        User user = findUserByIdOrThrow(userId);
+        User friend = findUserByIdOrThrow(friendId);
+        return userStorage.removeFriend(user.getId(), friend.getId());
     }
 
     public List<User> getFriends(Long userId) {
-        User user = getUserById(userId);
-        Set<Long> friendIds = user.getFriends();
-        List<User> friends = new ArrayList<>();
-
-        for (Long id : friendIds) {
-            friends.add(getUserById(id));
-        }
-
-        return friends;
+        User user = findUserByIdOrThrow(userId);
+        return user.getFriends().stream()
+                .map(this::findUserByIdOrThrow)
+                .collect(Collectors.toList());
     }
 
     public List<User> getCommonFriends(Long userId, Long otherId) {
-        User user = getUserById(userId);
-        User otherUser = getUserById(otherId);
-
-        Set<Long> commonFriendIds = user.getFriends();
-        commonFriendIds.retainAll(otherUser.getFriends());
-
-        List<User> commonFriends = new ArrayList<>();
-        for (Long id : commonFriendIds) {
-            commonFriends.add(getUserById(id));
-        }
-
-        return commonFriends;
+        User user = findUserByIdOrThrow(userId);
+        User otherUser = findUserByIdOrThrow(otherId);
+        return user.getFriends().stream()
+                .filter(otherUser.getFriends()::contains)
+                .map(this::findUserByIdOrThrow)
+                .collect(Collectors.toList());
     }
 
     public List<User> findAll() {
-        return new ArrayList<>(userStorage.findAll());
+        return userStorage.findAll();
     }
 
     public User findById(Long id) {
-        return getUserById(id);
+        return findUserByIdOrThrow(id);
     }
 
+    @Transactional
     public User create(User user) {
+        ValidationUtils.validateUserNotNull(user);
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
         return userStorage.create(user);
     }
 
+    @Transactional
     public User update(User user) {
+        ValidationUtils.validateUserNotNull(user);
+        findUserByIdOrThrow(user.getId());
         return userStorage.update(user);
     }
 
-    private User getUserById(Long userId) {
-        return userStorage.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден."));
+    private User findUserByIdOrThrow(Long id) {
+        return userStorage.findById(id).orElseThrow(() -> new NotFoundException("Пользователь с идентификатором " + id + " не найден."));
     }
 }

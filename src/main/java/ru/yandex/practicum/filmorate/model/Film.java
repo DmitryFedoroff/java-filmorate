@@ -11,9 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.annotation.DateAfterStandart;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(of = {"id"})
@@ -39,9 +40,8 @@ public class Film {
     @JsonIgnore
     private Set<Long> likes = new HashSet<>();
 
-    @NotNull(message = "Жанр фильма должен быть указан.")
-    private List<String> genres;
+    private List<Genre> genres = new ArrayList<>();
 
     @NotNull(message = "Возрастной рейтинг фильма должен быть указан.")
-    private String mpaRating;
+    private MpaCategory mpa;
 }

@@ -38,5 +38,5 @@ public class User {
     private Set<Long> friends = new HashSet<>();
 
     @JsonIgnore
-    private String friendshipStatus;
+    private Set<Long> friendRequests = new HashSet<>();
 }

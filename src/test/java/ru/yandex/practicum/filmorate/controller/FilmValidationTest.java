@@ -6,9 +6,10 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.MpaCategory;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,8 +32,10 @@ public class FilmValidationTest {
         film.setDescription("Valid description");
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
         film.setDuration(120L);
-        film.setGenres(List.of("Комедия"));
-        film.setMpaRating("G");
+        film.setGenres(new ArrayList<>());
+        MpaCategory mpa = new MpaCategory();
+        mpa.setId(1);
+        film.setMpa(mpa);
 
         assertFalse(validator.validate(film).isEmpty(), "Ожидалась ошибка: название фильма пустое");
     }
@@ -44,8 +47,10 @@ public class FilmValidationTest {
         film.setDescription("a".repeat(201));
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
         film.setDuration(120L);
-        film.setGenres(List.of("Комедия"));
-        film.setMpaRating("G");
+        film.setGenres(new ArrayList<>());
+        MpaCategory mpa = new MpaCategory();
+        mpa.setId(1);
+        film.setMpa(mpa);
 
         assertFalse(validator.validate(film).isEmpty(), "Ожидалась ошибка: описание фильма слишком длинное");
     }
@@ -57,8 +62,10 @@ public class FilmValidationTest {
         film.setDescription("Valid description");
         film.setReleaseDate(LocalDate.of(1895, 12, 27));
         film.setDuration(120L);
-        film.setGenres(List.of("Комедия"));
-        film.setMpaRating("G");
+        film.setGenres(new ArrayList<>());
+        MpaCategory mpa = new MpaCategory();
+        mpa.setId(1);
+        film.setMpa(mpa);
 
         assertFalse(validator.validate(film).isEmpty(), "Ожидалась ошибка: дата релиза до 28 декабря 1895 года");
     }
@@ -70,8 +77,10 @@ public class FilmValidationTest {
         film.setDescription("Valid description");
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
         film.setDuration(0L);
-        film.setGenres(List.of("Комедия"));
-        film.setMpaRating("G");
+        film.setGenres(new ArrayList<>());
+        MpaCategory mpa = new MpaCategory();
+        mpa.setId(1);
+        film.setMpa(mpa);
 
         assertFalse(validator.validate(film).isEmpty(), "Ожидалась ошибка: продолжительность фильма не может быть нулевой или отрицательной");
     }
@@ -83,8 +92,10 @@ public class FilmValidationTest {
         film.setDescription("Valid description");
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
         film.setDuration(120L);
-        film.setGenres(List.of("Комедия"));
-        film.setMpaRating("G");
+        film.setGenres(new ArrayList<>());
+        MpaCategory mpa = new MpaCategory();
+        mpa.setId(1);
+        film.setMpa(mpa);
 
         assertTrue(validator.validate(film).isEmpty(), "Ожидалась успешная валидация при корректных данных");
     }
@@ -96,8 +107,10 @@ public class FilmValidationTest {
         film.setDescription("a".repeat(200));
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
         film.setDuration(120L);
-        film.setGenres(List.of("Комедия"));
-        film.setMpaRating("G");
+        film.setGenres(new ArrayList<>());
+        MpaCategory mpa = new MpaCategory();
+        mpa.setId(1);
+        film.setMpa(mpa);
 
         assertTrue(validator.validate(film).isEmpty(), "Ожидалась успешная валидация при описании длиной ровно 200 символов");
     }
